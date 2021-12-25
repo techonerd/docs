@@ -273,9 +273,9 @@ class PublicAPIFilter(object):
     if doc_controls.should_skip(obj):
       return True
 
-    if isinstance(parent, type):
-      if doc_controls.should_skip_class_attr(parent, name):
-        return True
+    if isinstance(parent, type) and doc_controls.should_skip_class_attr(
+        parent, name):
+      return True
 
     if doc_controls.should_doc_private(obj):
       return False
@@ -287,7 +287,7 @@ class PublicAPIFilter(object):
       if len(mod_base_dirs) == 1:
         mod_base_dir = mod_base_dirs[0]
         # Check that module is in one of the `self._base_dir`s
-        if not any(base in mod_base_dir.parents for base in self._base_dir):
+        if all(base not in mod_base_dir.parents for base in self._base_dir):
           return True
 
     # Skip objects blocked by the private_map

@@ -159,11 +159,8 @@ class Module(TocNode):
 
   @property
   def title(self):
-    if self.full_name.count('.') > 1:
-      title = self.full_name.split('.')[-1]
-    else:
-      title = self.full_name
-    return title
+    return (self.full_name.split('.')[-1]
+            if self.full_name.count('.') > 1 else self.full_name)
 
   @property
   def children(self):
@@ -255,7 +252,7 @@ class GenerateToc(object):
         # For example, if module is `tf.keras.applications.densenet` then its
         # parent is `tf.keras.applications`.
         parent_module = '.'.join(module.split('.')[:-1])
-        parent_mod_obj = toc_graph.get(parent_module, None)
+        parent_mod_obj = toc_graph.get(parent_module)
         if parent_mod_obj is not None:
           parent_mod_obj.add_submodule(mod)
       else:
@@ -290,10 +287,9 @@ class GenerateToc(object):
       A list of dictionaries containing child's title and path.
     """
 
-    children_list = []
-    children_list.append(
-        collections.OrderedDict([('title', 'Overview'), ('path', mod.path)]))
-
+    children_list = [
+        collections.OrderedDict([('title', 'Overview'), ('path', mod.path)])
+    ]
     for child in mod.children:
       child_yaml_content = [('title', child.title), ('path', child.path)]
 
@@ -579,7 +575,7 @@ def write_docs(
     raw_proto.write_bytes(serialized_proto)
     return
 
-  if num_docs_output == 0 and not gen_report:
+  if num_docs_output == 0:
     raise ValueError('The `DocGenerator` failed to generate any docs. Verify '
                      'your arguments (`base_dir` and `callbacks`). '
                      'Everything you want documented should be within '
@@ -941,11 +937,7 @@ class DocGenerator:
     # Copy the top level files to the `{output_dir}/`, delete and replace the
     # `{output_dir}/{short_name}/` directory.
 
-    if self._gen_report:
-      glob_pattern = '*.pb'
-    else:
-      glob_pattern = '*'
-
+    glob_pattern = '*.pb' if self._gen_report else '*'
     for work_path in work_py_dir.glob(glob_pattern):
       out_path = pathlib.Path(output_dir) / work_path.name
       out_path.parent.mkdir(exist_ok=True, parents=True)

@@ -67,9 +67,8 @@ license_re = re.compile("#@title Licensed under the Apache License")
 def license_check(args):
   if license_re.search(args["cell_source"]):
     return True
-  else:
-    template_url = "https://github.com/tensorflow/docs/blob/master/tools/templates/notebook.ipynb"
-    fail(f"License cell missing or doesn't follow template: {template_url}")
+  template_url = "https://github.com/tensorflow/docs/blob/master/tools/templates/notebook.ipynb"
+  fail(f"License cell missing or doesn't follow template: {template_url}")
 
 
 @lint(scope=Options.Scope.FILE)
@@ -258,7 +257,7 @@ def button_website(args):
   if "r1" in rel_path.parts:
     return True  # No website button for TF 1.x docs.
 
-  if str(docs_dir) == "site/zh-cn" or str(docs_dir) == "site/zh-tw":
+  if str(docs_dir) in ["site/zh-cn", "site/zh-tw"]:
     base_url = "https://tensorflow.google.cn/"
   else:
     base_url = "https://www.tensorflow.org/"
@@ -294,10 +293,9 @@ def button_hub(args):
 
   if is_button_cell_re.search(cell_source) and cell_source.find(hub_url) != -1:
     return True
-  else:
-    # If included verbatim, bracket will fail lint. That's desired.
-    url_format = f"{hub_url}<MODEL-OR-COLLECTION>"
-    fail(f"'TFHub' button URL doesn't match pattern: {url_format}")
+  # If included verbatim, bracket will fail lint. That's desired.
+  url_format = f"{hub_url}<MODEL-OR-COLLECTION>"
+  fail(f"'TFHub' button URL doesn't match pattern: {url_format}")
 
 
 @lint(
@@ -317,7 +315,7 @@ def button_r1_extra(args):
     return True
 
   download_url = "https://storage.googleapis.com/tensorflow_docs/"
-  if str(docs_dir) == "site/zh-cn" or str(docs_dir) == "site/zh-tw":
+  if str(docs_dir) in ["site/zh-cn", "site/zh-tw"]:
     base_url = "https://tensorflow.google.cn/"
   else:
     base_url = "https://www.tensorflow.org/"

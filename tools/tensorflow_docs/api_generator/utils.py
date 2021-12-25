@@ -37,11 +37,8 @@ def recursive_import(root, strict=False):
 
   modules = []
 
-  kwargs = {}
   # If strict=False, ignore errors during `pkgutil.walk_packages`.
-  if not strict:
-    kwargs = {'onerror': _onerror}
-
+  kwargs = {'onerror': _onerror} if not strict else {}
   for _, name, _ in pkgutil.walk_packages(
       root.__path__, prefix=root.__name__ + '.', **kwargs):
     try:

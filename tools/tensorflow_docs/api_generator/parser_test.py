@@ -141,8 +141,7 @@ class ExampleDataclass:
   y: bool = False
 
   def add(self, x: int, y: int) -> int:
-    q: int = x + y
-    return q
+    return x + y
 
 
 class ParserTest(parameterized.TestCase):
@@ -1135,11 +1134,10 @@ class TestIgnoreLineInBlock(parameterized.TestCase):
         for start, end in zip(block_start, block_end)
     ]
 
-    ignored_lines = []
-    for line in text.splitlines():
-      if any(filter_block(line) for filter_block in filters):
-        ignored_lines.append(line)
-
+    ignored_lines = [
+        line for line in text.splitlines() if any(
+            filter_block(line) for filter_block in filters)
+    ]
     self.assertEqual('\n'.join(ignored_lines), expected_ignored_lines)
 
   def test_clean_text(self):
@@ -1158,11 +1156,10 @@ class TestIgnoreLineInBlock(parameterized.TestCase):
 
     filters = [parser.IgnoreLineInBlock('```', '```')]
 
-    clean_text = []
-    for line in text.splitlines():
-      if not any(filter_block(line) for filter_block in filters):
-        clean_text.append(line)
-
+    clean_text = [
+        line for line in text.splitlines()
+        if not any(filter_block(line) for filter_block in filters)
+    ]
     expected_clean_text = 'Useful information.\nDon\'t ignore.\nStuff.'
 
     self.assertEqual('\n'.join(clean_text), expected_clean_text)

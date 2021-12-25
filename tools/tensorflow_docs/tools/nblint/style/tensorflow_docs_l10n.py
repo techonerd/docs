@@ -45,14 +45,8 @@ def is_translation(args):
   """Translations live in the site/<lang>/ directory of the docs-l10n repo."""
   path_str = str(args["path"].resolve())
 
-  if "site/" not in path_str:
-    return False
-  elif "site/en/" in path_str:
-    return False
-  elif "site/en-snapshot/" in path_str:
-    return False
-  else:
-    return True
+  return ("site/" in path_str and "site/en/" not in path_str
+          and "site/en-snapshot/" not in path_str)
 
 
 # Catch tensorflow.org hostname usage in Chinese docs. Ignore false positives
@@ -81,7 +75,7 @@ def china_hostname_url(args):
   docs_dir, _ = split_doc_path(args["path"])
 
   # Only applicable for China docs.
-  if str(docs_dir) != "site/zh-cn" and str(docs_dir) != "site/zh-tw":
+  if str(docs_dir) not in ["site/zh-cn", "site/zh-tw"]:
     return True
 
   if has_tf_hostname_re.search(args["cell_source"]):

@@ -87,7 +87,7 @@ class Lint:
     self.run = fn
     self.scope = scope
     self.cond = cond
-    self.name = name if name else fn.__name__
+    self.name = name or fn.__name__
     self.message = message.strip() if message else ""
     self.style = None  # Added on style load.
 

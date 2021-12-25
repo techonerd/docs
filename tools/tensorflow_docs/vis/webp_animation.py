@@ -114,10 +114,8 @@ class Webp(object):
 
     self._encoder.encode_frame(img, int(self._timestamp_ms))
 
-    if dt_ms is None:
-      self._timestamp_ms += 1000 * (1.0 / self.frame_rate)
-    else:
-      self._timestamp_ms += dt_ms
+    self._timestamp_ms += (1000 * (1.0 / self.frame_rate)
+                           if dt_ms is None else dt_ms)
 
   def extend(self, imgs, dt_ms=None):
     """Extend tha animation with an iterable if images.

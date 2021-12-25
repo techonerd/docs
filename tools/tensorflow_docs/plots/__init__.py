@@ -107,6 +107,5 @@ class HistoryPlotter(object):
     plt.ylabel(metric.replace('_', ' ').title())
     plt.legend()
 
-    plt.xlim(
-        [0, max([history.epoch[-1] for name, history in histories.items()])])
+    plt.xlim([0, max(history.epoch[-1] for name, history in histories.items())])
     plt.grid(True)
