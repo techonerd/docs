@@ -320,7 +320,7 @@ class LinterStatus:
     if not isinstance(run_status.is_success, bool):
       raise TypeError(
           f"Lint status must return Boolean, got: {run_status.is_success}")
-    name = name if name else lint.name
+    name = name or lint.name
     entry = self.LintStatusEntry(lint, run_status, name, group, is_group_entry)
     self._status_list.append(entry)
 
@@ -331,12 +331,8 @@ class LinterStatus:
     Returns:
       Boolean: True if all top-level status entries pass, otherwise False.
     """
-    status = True
-    for entry in self._status_list:
-      if not entry.is_group_entry and not entry.run_status.is_success:
-        status = False
-        break
-    return status
+    return not any(not entry.is_group_entry and not entry.run_status.is_success
+                   for entry in self._status_list)
 
   def log_lint_message(self,
                        msg: str,
@@ -378,13 +374,10 @@ class LinterStatus:
       String: 'Pass' or 'Fail' with terminal color codes.
     """
     if entry.run_status.is_success:
-      msg = "\033[32mPass\033[00m"  # Green
+      return "\033[32mPass\033[00m"
     else:
-      if entry.is_group_entry:
-        msg = "\033[33mFail\033[00m"  # Yellow: group entry
-      else:
-        msg = "\033[91mFail\033[00m"  # Light red: root entry
-    return msg
+      return ("\033[33mFail\033[00m"
+              if entry.is_group_entry else "\033[91mFail\033[00m")
 
   def __str__(self):
     """Print the entire status report of all entries to console.

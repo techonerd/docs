@@ -316,19 +316,15 @@ class DocGeneratorVisitor(object):
     container = self._index.get('.'.join(parts[:-1]), name)
 
     defining_class_score = 1
-    if inspect.isclass(container):
-      if short_name in container.__dict__:
-        # prefer the defining class
-        defining_class_score = -1
+    if inspect.isclass(container) and short_name in container.__dict__:
+      # prefer the defining class
+      defining_class_score = -1
 
     experimental_score = -1
     if 'contrib' in parts or any('experimental' in part for part in parts):
       experimental_score = 1
 
-    keras_score = 1
-    if 'keras' in parts:
-      keras_score = -1
-
+    keras_score = -1 if 'keras' in parts else 1
     while parts:
       container = self._index['.'.join(parts)]
       if inspect.ismodule(container):
@@ -337,13 +333,7 @@ class DocGeneratorVisitor(object):
 
     module_length = len(parts)
 
-    if len(parts) == 2:
-      # `tf.submodule.thing` is better than `tf.thing`
-      module_length_score = -1
-    else:
-      # shorter is better
-      module_length_score = module_length
-
+    module_length_score = -1 if len(parts) == 2 else module_length
     return (defining_class_score, experimental_score, keras_score,
             module_length_score, name)
 

@@ -31,19 +31,14 @@ from tensorflow_docs.api_generator.report.schema import api_report_generated_pb2
 def _get_source(py_object: Any) -> Optional[str]:
   if py_object is not None:
     try:
-      source = textwrap.dedent(inspect.getsource(py_object))
-      return source
+      return textwrap.dedent(inspect.getsource(py_object))
     except Exception:  # pylint: disable=broad-except
       return None
   return None
 
 
 def _count_empty_param(items: List[Tuple[str, str]]) -> int:
-  count = 0
-  for item in items:
-    if not item[1].strip():
-      count += 1
-  return count
+  return sum(not item[1].strip() for item in items)
 
 
 def lint_params(page_info: parser.PageInfo) -> api_report_pb2.ParameterLint:
@@ -58,9 +53,9 @@ def lint_params(page_info: parser.PageInfo) -> api_report_pb2.ParameterLint:
   """
   param_lint = api_report_pb2.ParameterLint()
 
-  reserved_keywords = frozenset(['self', 'cls', '_cls'])
-
   if page_info.py_object is not None:
+    reserved_keywords = frozenset(['self', 'cls', '_cls'])
+
     try:
       sig = inspect.signature(page_info.py_object)
       args_in_code = sig.parameters.keys()
@@ -103,15 +98,10 @@ def lint_description(
     A filled `DescriptionLint` proto object.
   """
 
-  len_brief = 0
-  if page_info.doc.brief:
-    len_brief = len(page_info.doc.brief.split())
-
-  len_long_desc = 0
-  for part in page_info.doc.docstring_parts:
-    if not isinstance(part, parser.TitleBlock):
-      len_long_desc += len(part.split())
-
+  len_brief = len(page_info.doc.brief.split()) if page_info.doc.brief else 0
+  len_long_desc = sum(
+      len(part.split()) for part in page_info.doc.docstring_parts
+      if not isinstance(part, parser.TitleBlock))
   return api_report_pb2.DescriptionLint(
       len_brief=len_brief, len_long_desc=len_long_desc)
 
@@ -195,9 +185,9 @@ def lint_returns(
 
   if source is not None and any(word in source for word in keywords):
     for item in page_info.doc.docstring_parts:
-      if isinstance(item, parser.TitleBlock):
-        if item.title.lower().startswith(keywords):
-          return api_report_pb2.ReturnLint(returns_defined=True)
+      if isinstance(
+          item, parser.TitleBlock) and item.title.lower().startswith(keywords):
+        return api_report_pb2.ReturnLint(returns_defined=True)
     # If "Returns"/"Yields" word is present in the brief docstring then having
     # a separate `Returns`/`Yields` section is not needed.
     if page_info.doc.brief.lower().startswith(keywords):
@@ -253,12 +243,12 @@ def lint_raises(page_info: parser.PageInfo) -> api_report_pb2.RaisesLint:
   # Extract the raises defined in the docstring.
   raises_defined_in_doc = []
   for part in page_info.doc.docstring_parts:
-    if isinstance(part, parser.TitleBlock):
-      if part.title.lower().startswith('raises'):
-        raises_lint.num_raises_defined = len(part.items)
-        if part.items:
-          raises_defined_in_doc.extend(list(zip(*part.items))[0])
-        break
+    if isinstance(
+        part, parser.TitleBlock) and part.title.lower().startswith('raises'):
+      raises_lint.num_raises_defined = len(part.items)
+      if part.items:
+        raises_defined_in_doc.extend(list(zip(*part.items))[0])
+      break
   else:
     raises_lint.num_raises_defined = 0
 

@@ -408,11 +408,7 @@ def should_skip(obj) -> bool:
   """
   if isinstance(obj, type):
     # For classes, only skip if the attribute is set on _this_ class.
-    if _DO_NOT_DOC in obj.__dict__:
-      return True
-    else:
-      return False
-
+    return _DO_NOT_DOC in obj.__dict__
   # Unwrap fget if the object is a property
   if isinstance(obj, property):
     obj = obj.fget
@@ -442,11 +438,7 @@ def _cls_attr_has_tag(cls, attr, tag):
   if isinstance(obj, type):
     # The attribute is a class. Check __dict__ to see if the attribute is set
     # on _this_ class, not its parents.
-    if tag in obj.__dict__:
-      return True
-    else:
-      return False
-
+    return tag in obj.__dict__
   return hasattr(obj, tag)
 
 

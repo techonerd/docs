@@ -69,7 +69,7 @@ def _print_fails(path_list):
   template = textwrap.dedent("""\
     The following notebook{plural} failed lint:
     {filepaths}""")
-  paths = "\n".join([f" {str(fp)}" for fp in path_list])
+  paths = "\n".join([f' {fp}' for fp in path_list])
   plural = "s" if len(paths) > 1 else ""
   print(template.format(filepaths=paths, plural=plural), file=sys.stderr)
 
